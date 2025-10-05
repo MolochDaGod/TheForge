@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deploy GRUDGE AI Worker to Puter</title>
+    <meta name="description" content="Deploy GRUDGE NFT Island AI Worker to Puter serverless platform with one-click deployment and automatic configuration">
+    <!-- 
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║  GRUDGE AI Worker Deployment Tool                            ║
+    ║  Version: 2.0 Enhanced                                       ║
+    ║                                                              ║
+    ║  Purpose: Deploy grudgeworker.js to Puter's serverless      ║
+    ║           platform with automated testing and config         ║
+    ║                                                              ║
+    ║  Features:                                                   ║
+    ║  • One-click deployment to Puter cloud                      ║
+    ║  • Automatic code validation                                 ║
+    ║  • Comprehensive endpoint testing                            ║
+    ║  • Auto-generated config code for easy integration          ║
+    ║  • Real-time deployment progress tracking                    ║
+    ║  • Error handling with troubleshooting tips                 ║
+    ║                                                              ║
+    ║  Usage:                                                      ║
+    ║  1. Open this file in a web browser                         ║
+    ║  2. Click "Deploy Worker" button                            ║
+    ║  3. Wait for deployment to complete                         ║
+    ║  4. Test the worker endpoints                               ║
+    ║  5. Copy config code and update index.html                  ║
+    ║                                                              ║
+    ║  Requirements:                                               ║
+    ║  • grudgeworker.js in same directory                        ║
+    ║  • Internet connection                                       ║
+    ║  • Modern web browser                                        ║
+    ║                                                              ║
+    ║  Support: See DEPLOY_WORKER_GUIDE.md for detailed help     ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -107,6 +139,20 @@
     <div class="container">
         <h1>🎮 Deploy GRUDGE AI Worker</h1>
         
+        <div class="step" style="background: rgba(33, 150, 243, 0.2); border-left: 4px solid #2196F3;">
+            <h3 style="color: #2196F3;">ℹ️ About This Deployment Tool</h3>
+            <p>This tool deploys your GRUDGE AI Worker (grudgeworker.js) to Puter's serverless platform.</p>
+            <p><strong>What it does:</strong></p>
+            <ul>
+                <li>✅ Reads your grudgeworker.js file with all AI capabilities</li>
+                <li>✅ Uploads it to Puter's cloud infrastructure</li>
+                <li>✅ Creates a serverless worker with a unique URL</li>
+                <li>✅ Tests the deployment to ensure it's working</li>
+                <li>✅ Provides configuration code to integrate with your app</li>
+            </ul>
+            <p><strong>After deployment:</strong> Copy the generated URL and update your index.html to enable AI features in your GRUDGE NFT Island catalog app!</p>
+        </div>
+        
         <div class="step">
             <h3>Step 1: Load Puter.js</h3>
             <p>Loading Puter.js library for worker deployment...</p>
@@ -135,6 +181,13 @@
                 <button class="copy-btn" onclick="copyUrl()">Copy URL</button>
             </div>
             
+            <h4>📝 Update Your index.html:</h4>
+            <p>Copy the code below and update the WORKER_URL in your index.html (around line 2349):</p>
+            <div class="worker-url" style="background: rgba(0, 0, 0, 0.3); font-family: 'Courier New', monospace; font-size: 13px;">
+                <pre id="configCode" style="margin: 0; white-space: pre-wrap;">WORKER_URL: '<span id="workerUrlCode"></span>',</pre>
+                <button class="copy-btn" onclick="copyConfigCode()">Copy Config Code</button>
+            </div>
+            
             <h4>Available Endpoints:</h4>
             <ul>
                 <li><code>GET /health</code> - Health check</li>
@@ -146,6 +199,16 @@
                 <li><code>POST /api/user/save-preferences</code> - Save user preferences</li>
                 <li><code>GET /api/user/preferences/:userId</code> - Get user preferences</li>
             </ul>
+            
+            <h4>✅ Next Steps:</h4>
+            <ol>
+                <li>Copy the configuration code above</li>
+                <li>Open your index.html file</li>
+                <li>Find the AI_WORKER_CONFIG section (around line 2346-2359)</li>
+                <li>Replace the WORKER_URL line with the copied code</li>
+                <li>Save index.html and reload your app</li>
+                <li>Your AI features should now be working! 🎉</li>
+            </ol>
         </div>
     </div>
 
@@ -194,23 +257,33 @@
                         throw new Error(`Failed to load grudgeworker.js: ${response.status}`);
                     }
                     workerCode = await response.text();
-                    deployStatus.textContent += '→ Worker code loaded successfully\n';
+                    deployStatus.textContent += `→ Worker code loaded successfully (${workerCode.length} bytes)\n`;
                 } catch (error) {
                     throw new Error(`Cannot load grudgeworker.js: ${error.message}. Make sure the file exists in the same directory.`);
                 }
 
+                // Validate worker code
+                if (!workerCode.includes('router.get') || !workerCode.includes('puter.ai.chat')) {
+                    throw new Error('Invalid worker code: Missing required AI functions. Check grudgeworker.js file.');
+                }
+                deployStatus.textContent += '→ Worker code validated ✅\n';
+
                 // Save worker code to Puter filesystem first
                 deployStatus.textContent += '→ Saving worker code to Puter filesystem\n';
                 await puter.fs.write(`${workerName}.js`, workerCode);
+                deployStatus.textContent += '→ Worker code saved to Puter ✅\n';
                 
                 // Deploy the worker
                 deployStatus.textContent += '→ Deploying worker to Puter platform (this may take 10-15 seconds)\n';
+                deployStatus.textContent += '→ Please wait, deployment in progress...\n';
+                
                 const deployment = await puter.workers.create(workerName, `${workerName}.js`);
                 
                 workerUrl = deployment.url;
                 
-                deployStatus.textContent += `→ Worker deployed successfully! ✅\n`;
+                deployStatus.textContent += `\n🎉 Worker deployed successfully! ✅\n`;
                 deployStatus.textContent += `→ Worker URL: ${workerUrl}\n`;
+                deployStatus.textContent += `→ Worker Name: ${workerName}\n`;
                 deployStatus.textContent += '→ Waiting 5 seconds for propagation...\n';
                 
                 deployStatus.className = 'status success';
@@ -218,11 +291,16 @@
                 // Enable test button after delay
                 setTimeout(() => {
                     document.getElementById('testBtn').disabled = false;
-                    deployStatus.textContent += '→ Ready for testing! ✅\n';
+                    deployStatus.textContent += '\n✅ Ready for testing! Click "Test Worker" button to verify deployment.\n';
                 }, 5000);
                 
             } catch (error) {
-                deployStatus.textContent += `❌ Deployment failed: ${error.message}\n`;
+                deployStatus.textContent += `\n❌ Deployment failed: ${error.message}\n`;
+                deployStatus.textContent += '\nTroubleshooting tips:\n';
+                deployStatus.textContent += '• Ensure grudgeworker.js exists in the same directory\n';
+                deployStatus.textContent += '• Check your internet connection\n';
+                deployStatus.textContent += '• Verify Puter.js loaded successfully in Step 1\n';
+                deployStatus.textContent += '• Try refreshing the page and deploying again\n';
                 deployStatus.className = 'status error';
                 deployBtn.disabled = false;
             }
@@ -239,46 +317,85 @@
 
             try {
                 // Test health endpoint
-                testStatus.textContent += '→ Testing health endpoint\n';
+                testStatus.textContent += '\n📡 Test 1: Health Check Endpoint\n';
+                testStatus.textContent += `→ Calling: ${workerUrl}/health\n`;
+                
                 const healthResponse = await fetch(`${workerUrl}/health`);
+                if (!healthResponse.ok) {
+                    throw new Error(`Health check failed with status ${healthResponse.status}`);
+                }
                 const healthData = await healthResponse.json();
                 
-                testStatus.textContent += `→ Health check: ${healthData.status} ✅\n`;
-                testStatus.textContent += `→ Service: ${healthData.service}\n`;
-                testStatus.textContent += `→ Version: ${healthData.version}\n`;
+                testStatus.textContent += `✅ Health check: ${healthData.status}\n`;
+                testStatus.textContent += `   Service: ${healthData.service}\n`;
+                testStatus.textContent += `   Version: ${healthData.version}\n`;
+                testStatus.textContent += `   Capabilities: ${healthData.capabilities?.length || 0} features\n`;
                 
                 // Test AI chat endpoint
-                testStatus.textContent += '→ Testing AI chat endpoint\n';
+                testStatus.textContent += '\n📡 Test 2: AI Chat Endpoint\n';
+                testStatus.textContent += `→ Calling: ${workerUrl}/api/chat\n`;
+                testStatus.textContent += '→ Sending test message to AI...\n';
+                
                 const chatResponse = await fetch(`${workerUrl}/api/chat`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: 'Hello! Can you help me with GRUDGE NFT Island items?',
+                        message: 'Hello! Can you briefly explain what GRUDGE NFT Island is?',
                         context: 'Testing worker deployment'
                     })
                 });
                 
+                if (!chatResponse.ok) {
+                    throw new Error(`AI chat test failed with status ${chatResponse.status}`);
+                }
+                
                 const chatData = await chatResponse.json();
                 
                 if (chatData.success) {
-                    testStatus.textContent += '→ AI chat test successful ✅\n';
-                    testStatus.textContent += `→ AI Response: ${chatData.response.substring(0, 100)}...\n`;
+                    testStatus.textContent += '✅ AI chat test successful\n';
+                    testStatus.textContent += `   Model: ${chatData.model}\n`;
+                    testStatus.textContent += `   Response preview: ${chatData.response.substring(0, 150)}...\n`;
                 } else {
-                    testStatus.textContent += `→ AI chat test failed: ${chatData.error}\n`;
+                    throw new Error(`AI chat returned error: ${chatData.error}`);
                 }
                 
-                testStatus.textContent += '\n🎉 All tests completed!\n';
+                // Test root endpoint
+                testStatus.textContent += '\n📡 Test 3: Root Endpoint\n';
+                testStatus.textContent += `→ Calling: ${workerUrl}/\n`;
+                
+                const rootResponse = await fetch(`${workerUrl}/`);
+                if (!rootResponse.ok) {
+                    throw new Error(`Root endpoint failed with status ${rootResponse.status}`);
+                }
+                const rootData = await rootResponse.json();
+                
+                testStatus.textContent += `✅ Root endpoint working\n`;
+                testStatus.textContent += `   Endpoints available: ${rootData.endpoints?.length || 0}\n`;
+                
+                testStatus.textContent += '\n🎉 All tests completed successfully! ✅\n';
+                testStatus.textContent += '\nYour worker is fully operational and ready to use!\n';
                 testStatus.className = 'status success';
                 
                 // Show worker info
                 document.getElementById('workerInfo').style.display = 'block';
                 document.getElementById('workerUrl').textContent = workerUrl;
+                document.getElementById('workerUrlCode').textContent = workerUrl;
                 
             } catch (error) {
-                testStatus.textContent += `❌ Testing failed: ${error.message}\n`;
+                testStatus.textContent += `\n❌ Testing failed: ${error.message}\n`;
+                testStatus.textContent += '\nPossible issues:\n';
+                testStatus.textContent += '• Worker may still be initializing (wait 10-15 seconds and retry)\n';
+                testStatus.textContent += '• Network connectivity issues\n';
+                testStatus.textContent += '• Worker deployment may have failed\n';
+                testStatus.textContent += '\nYou can still use the worker URL, but some features may not work.\n';
                 testStatus.className = 'status error';
+                
+                // Still show worker info even if tests fail
+                document.getElementById('workerInfo').style.display = 'block';
+                document.getElementById('workerUrl').textContent = workerUrl;
+                document.getElementById('workerUrlCode').textContent = workerUrl;
             }
             
             testBtn.disabled = false;
@@ -293,6 +410,21 @@
                 const urlElement = document.getElementById('workerUrl');
                 const range = document.createRange();
                 range.selectNode(urlElement);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+            });
+        }
+
+        function copyConfigCode() {
+            const configCode = `WORKER_URL: '${workerUrl}',`;
+            navigator.clipboard.writeText(configCode).then(() => {
+                alert('Configuration code copied to clipboard!\n\nPaste this into your index.html at line 2349 to update the WORKER_URL.');
+            }).catch(err => {
+                console.error('Failed to copy config code:', err);
+                // Fallback: select the text
+                const codeElement = document.getElementById('configCode');
+                const range = document.createRange();
+                range.selectNode(codeElement);
                 window.getSelection().removeAllRanges();
                 window.getSelection().addRange(range);
             });
